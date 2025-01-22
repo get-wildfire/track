@@ -61,6 +61,7 @@
           throw new Error(`HTTP error! status: ${response.status}`);
         }
         // Store the timestamp of successful request
+        console.log("Successfully sent event to Dub");
         localStorage.setItem(lastRequestKey, now.toString());
       })
       .catch((error) => {
