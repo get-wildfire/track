@@ -24,6 +24,18 @@
     const pathname = window.location.pathname;
     const hostname = window.location.hostname;
     const eventName = `${pathname} | ${hostname}`;
+
+    // Check last request time from localStorage
+    const lastRequestKey = `dub_last_request_${pathname}`;
+    const lastRequest = localStorage.getItem(lastRequestKey);
+    const now = Date.now();
+
+    // If there was a request in the last 10 minutes, skip
+    if (lastRequest && now - parseInt(lastRequest) < 10 * 60 * 1000) {
+      console.log("Skipping Dub event - rate limited");
+      return;
+    }
+
     const clickId = getCookie("dub_id");
     const externalId = await getIPAddress();
 
@@ -48,6 +60,8 @@
         if (!response.ok) {
           throw new Error(`HTTP error! status: ${response.status}`);
         }
+        // Store the timestamp of successful request
+        localStorage.setItem(lastRequestKey, now.toString());
       })
       .catch((error) => {
         console.error("Failed to send event to Dub:", error);
