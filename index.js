@@ -7,29 +7,41 @@
     return null;
   }
 
+  // Function to get IP address
+  async function getIPAddress() {
+    try {
+      const response = await fetch("https://api.ipify.org?format=json");
+      const data = await response.json();
+      return data.ip;
+    } catch (error) {
+      console.error("Failed to get IP address:", error);
+      return null;
+    }
+  }
+
   // Function to send event to Dub
-  function sendToDub() {
+  async function sendToDub() {
     const pathname = window.location.pathname;
     const hostname = window.location.hostname;
     const eventName = `${pathname} | ${hostname}`;
     const clickId = getCookie("dub_id");
+    const externalId = await getIPAddress();
 
     if (!clickId) {
       console.warn("No dub_id found in cookies");
       return;
     }
 
-    fetch("https://api.dub.co/track/lead", {
+    fetch("https://staging-gateway.getwildfire.gg/v2/links/dub-link", {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        Authorization: "Bearer <token>",
       },
+      mode: "no-cors",
       body: JSON.stringify({
         eventName,
         clickId,
-        url: window.location.href,
-        referrer: document.referrer,
+        externalId,
       }),
     })
       .then((response) => {
